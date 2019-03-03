@@ -1,0 +1,197 @@
+{% extends "flood_monitoring_system/header.html" %}
+{% load staticfiles%}
+
+{% block header %}
+<script src="{% static 'lib/jquery-ui/jquery-ui.min.js' %}"></script>
+<script src="{% static 'lib/jquery-ui/jquery-ui-time.js' %}"></script>
+<script src="{% static 'js/test.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/test.css' %}" />
+<link rel="stylesheet" href="{% static 'lib/jquery-ui/jquery-ui.min.css' %}" />
+<link rel="stylesheet" href="{% static 'lib/jquery-ui/jquery-ui-time.css' %}" />
+
+
+{% endblock %}
+
+{% block maintitle %}Test Mode{% endblock %}
+
+{% block maincontent %}
+<h2>Data from Sensors</h2>
+<form id="test-form" method="post" action="">
+{% csrf_token %}
+<table id="sensor-table" class="table">
+  <thead>
+    <tr>
+      <th scope="col">Sensor</th>
+      <th scope="col">River height (mm)</th>
+      <th scope="col">Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+          <select vtype="select" class="custom-select" name="device-select-1"  id="device-select-1" style="width:100%;">
+             <option selected disabled>--Select Device--</option>
+              {% for device in object_list.sensors_all.results %}
+                   <option>{{ device.location  }}</option>
+              {% endfor %}
+          </select>
+            {% for device in object_list.sensors_all.results %}
+                  <input type="hidden" name="{{ device.location  }}long" value="{{ device.long  }}"/>
+                  <input type="hidden" name="{{ device.location  }}lat" value="{{ device.lat  }}"/>
+            {% endfor %}
+      </td>
+      <td>
+          <input type="number" vtype="number"  name="device-water-level-1" id="device-water-level-1" class="form-control" placeholder="1000">
+      </td>
+      <td>
+          <input type="text" vtype="text" name="device-date-1" id="device-date-1" class="form-control"  placeholder="DD/MM/YYY hh:mm">
+      </td>
+      <td>
+         <div class="form-group">
+           <p class="del-btn"><i class="fas fa-times"></i></p>
+         </div>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+      <tr>
+         <td>
+            <p class="btn btn-secondary add-btn"><i class="fas fa-plus"></i> Add</p>
+         </td>
+      </tr>
+  </tfoot>
+</table>
+<br><br><br>
+<h2>Data from Stations</h2>
+<table id="station-table" class="table">
+  <thead>
+    <tr>
+      <th scope="col">Station</th>
+      <th scope="col">River height (mm)</th>
+      <th scope="col">Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+          <select type="select" vtype="select" class="custom-select" name="station-select-1" id="station-select-1" style="width:100%;">
+             <option selected disabled>--Select Device--</option>
+          </select>
+      </td>
+      <td>
+          <input type="number" vtype="number"  name="station-water-level-1" id="station-waterlevel-1" class="form-control" placeholder="1000">
+      </td>
+      <td>
+          <input type="text" vtype="text" name="station-date-1" id="station-date-1" class="form-control"  placeholder="DD/MM/YYY hh:mm">
+      </td>
+      <td>
+         <div class="form-group">
+           <p class="del-btn"><i class="fas fa-times"></i></p>
+         </div>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+      <tr>
+         <td>
+            <p class="btn btn-secondary add-btn"><i class="fas fa-plus"></i> Add</p>
+         </td>
+      </tr>
+  </tfoot>
+</table>
+<br><br><br>
+<h2>Email alert notifications</h2><h4>this emulates a flood alert at the given area. if a station you are subscribed
+to is within ten miles of the flood alert you will receive an email notification with the flood warning.</h4>
+<table id="alert-table" class="table">
+  <thead>
+    <tr>
+        <th scope="col">Area</th>
+        <th scope="col">Message</th>
+        <th scope="col">Severity Rating</th>
+        <th scope="col">Severity Message</th>
+        <th scope="col">time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+        <td>
+          <select type="select" vtype="select"  name="flood-area-1" class="custom-select" id="flood-area-1" style="width:100%;">
+              <option selected disabled>--Select Rating--</option>
+              {% for area in object_list.flood_areas.results %}
+                   <option value="{{ area.area }}">{{ area.label  }}</option>
+              {% endfor %}
+          </select>
+      </td>
+      <td>
+          <input name="notification-message-1" type="text" vtype="text"  id="notification-message-1" class="form-control" >
+      </td>
+      <td>
+          <select type="select" vtype="select"  name="severity-rating-1" class="custom-select" id="severity-rating-1" style="width:100%;">
+              <option selected disabled>--Select Rating--</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+          </select>
+      </td>
+      <td>
+          <input name="severity-message-1" type="text" vtype="text"  id="severity-message-1" class="form-control">
+      </td>
+      <td>
+          <input name="notification-date-1" type="text" vtype="text"  id="notification-date-1" class="form-control"  placeholder="DD/MM/YYY hh:mm">
+      </td>
+      <td>
+         <div class="form-group">
+           <p class="del-btn"><i class="fas fa-times"></i></p>
+         </div>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot>
+      <tr>
+         <td>
+            <p class="btn btn-secondary add-btn"><i class="fas fa-plus"></i> Add</p>
+         </td>
+      </tr>
+  </tfoot>
+</table>
+
+<input type="button" class="btn btn-primary btn-lg" id="gen" value="Generate">
+</form>
+<div id="stats">
+<div class="row">
+    <div class="col-md-12">
+       <section class="panel">
+           <header class="panel-heading">
+               <div class="panel-actions">
+                   <a href="#" class="fa fa-caret-down"></a>
+                   <a href="#" class="fa fa-times"></a>
+               </div>
+               <h2 class="panel-title">Water Levels</h2>
+           </header>
+           <div class="panel-body">
+                <div id="chartSensor" style="height: 400px; width: 100%;"></div>
+           </div>
+       </section>
+   </div>
+    <div class="col-md-6">
+        <section class="panel">
+           <header class="panel-heading">
+               <div class="panel-actions">
+                   <a href="#" class="fa fa-caret-down"></a>
+                   <a href="#" class="fa fa-times"></a>
+               </div>
+               <h2 class="panel-title">Live Map</h2>
+               <p class="panel-subtitle">Water level data from all over Canterbury. Updates regularly.</p>
+           </header>
+           <div class="panel-body">
+
+           </div>
+       </section>
+    </div>
+</div>
+
+</div>
+{% endblock %}
+
+

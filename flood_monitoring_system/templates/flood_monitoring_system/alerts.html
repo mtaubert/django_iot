@@ -1,0 +1,65 @@
+{% extends "flood_monitoring_system/header.html" %}
+{% load staticfiles%}
+
+{% block header %}
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<script src="{% static 'lib/jquery-cookie/jquery.cookie.js' %}"></script>
+<script src="{% static 'js/notify.js' %}"></script>
+    s
+{% endblock %}
+
+{#html body#}
+{% block maintitle %}Flood Alerts{% endblock %}
+
+{% block maincontent %}
+    {% for n in object_list.flood_alerts.alert_data %}
+        <div class="row">
+            <div class="col-md-12">
+                <small>{{ n.time  }}</small>
+            </div>
+        </div>
+        {% if n.severity_rating == 3 or n.severity_rating == 4 %}
+            <li class="list-group-item list-group-item-success notification-list">
+                <div class="row">
+                    <div class="col-md-1 icon">
+                        <i class="fa fa-thumbs-up bg-success"></i>
+                    </div>
+        {% elif n.severity_rating  == 2  %}
+            <li class="list-group-item list-group-item-warning notification-list">
+                <div class="row">
+                    <div class="col-md-1 icon">
+                        <i class="fa fa-exclamation-triangle bg-warning" ></i>
+                    </div>
+        {% elif n.severity_rating  == 0 or  n.severity_rating  == 1%}
+            <li class="list-group-item list-group-item-danger icon notification-list">
+                <div class="row">
+                        <div class="col-md-1 icon">
+                            <i class="fa fa-thumbs-down bg-danger"></i>
+                        </div>
+        {% else %}
+            {#   default no color         #}
+            <li class="list-group-item list-group-item-primary icon notification-list">
+            <div class="row">
+                <div class="col-md-1 icon">
+                    <i class="fa fa-bell bg-primary"></i>
+                </div>
+        {% endif %}
+
+        <div class="col-md-9">
+            <b>{{ n.severity_message}}: </b>{{ n.message }}
+        </div>
+        <div class="col-md-2">
+            <input type="checkbox" class="read-notification-switch" data-toggle="toggle" name="{{ n.id }}" data-on="unread" data-off="read &#10004;"
+            {% if n.read == False %}
+                checked
+            {% endif %}
+            >
+        </div>
+    </div>
+    </li>
+    <br>
+    {% endfor %}
+{% endblock %}
+
+

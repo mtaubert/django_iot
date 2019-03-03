@@ -1,0 +1,47 @@
+{% extends "flood_monitoring_system/header.html" %}
+{% load staticfiles%}
+
+{% block header %}
+<script src="{% static 'lib/jquery-cookie/jquery.cookie.js' %}"></script>
+<script src="{% static 'js/subscribe.js' %}"></script>
+{% endblock %}
+
+{% block maintitle %}Manage Your Station Subscriptions{% endblock %}
+
+{% block maincontent %}
+<div class="row">
+    <div class="col-md-6 col-sm-6 col-xs-12">
+        <h3>Search Stations</h3>
+        <form action="" method="post">
+            {% csrf_token %}
+            <label>You will also receive local flood alerts close to these stations</label>
+            <div class="form-group input-group">
+                <select type="text" class="form-control" id="station-select" name="station">
+                    <option selected disabled>--Select Station--</option>
+                </select>
+            </div>
+            <input id="label" name="label" type="hidden"/>
+            <input id="subscribe" type="submit" class="btn btn-primary" value="Subscribe to Station"/>
+            <p>{{ msg }}</p>
+        </form>
+        <ul id="data-preview"></ul>
+    </div>
+    <div class="col-md-6  col-sm-6 col-xs-12">
+        <h3>Your Subscribed Stations</h3>
+         <div id="sub-list">
+         {% for s in subs %}
+             <div class='row list-group-item' >
+                <div class="col-md-11">
+                    <p>{{ s.label }}</p>
+                </div>
+                 <div class="col-md-1">
+                     <p class="del-btn" station="{{ s.station }}"><i class="fas fa-times"></i></p>
+                 </div>
+             </div>
+         {% endfor %}
+         </div>
+    </div>
+ </div>
+{% endblock %}
+
+

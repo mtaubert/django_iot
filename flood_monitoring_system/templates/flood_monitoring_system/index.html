@@ -1,0 +1,226 @@
+{% extends "flood_monitoring_system/header.html" %}
+{% load staticfiles%}
+
+{% block header %}
+<script src="{% static 'lib/canvasjs-2.2/canvasjs.min.js' %}"></script>
+<script>
+window.onload = function () {
+
+    $(".service-time").each(function() {
+        let str_date = $(this).text()
+        let date = new Date(str_date).getTime();
+        var cur_date = new Date();
+        let diff_date = cur_date - date;
+        let hour = 3600000;
+        let day = 86400000;
+        let list_element = $(this).closest( "li" );
+        let icon = list_element.find(".service-icon");
+        if (diff_date < hour){
+            //good;
+            list_element.addClass("list-group-item-success ");
+            icon.addClass("fas fa-thumbs-up");
+        }else if(diff_date > hour && diff_date < day){
+            //warning
+            list_element.addClass("list-group-item-warning ");
+            icon.addClass("fas fa-thumbs-down");
+        }else if(diff_date > day){
+            //bad
+            list_element.addClass("list-group-item-danger ");
+            icon.addClass("fas fa-exclamation-triangle");
+        }
+    });
+
+
+
+CanvasJS.addColorSet("multicolor", [
+    "#38AADD",
+    "#72B026",
+    "#F69730",
+    "#D63E2A",
+    "#D152B8",
+    "#FF91EA",
+    "#0067A3",
+    "#000000",
+]);
+var chart = new CanvasJS.Chart("chartSensor", {
+	animationEnabled: true,
+	theme: "light2",
+    colorSet:"multicolor",
+	axisX:{
+	    title: "Date and Time",
+		valueFormatString: "DD MMM hh:mm TT",
+		crosshair: {
+			enabled: true,
+			snapToDataPoint: true
+		}
+	},
+	axisY: {
+        title: "Water Level",
+        suffix: "mm",
+		crosshair: {
+			enabled: true
+		}
+	},
+	toolTip:{
+		shared:true
+	},
+	legend:{
+		cursor:"pointer",
+		verticalAlign: "bottom",
+		horizontalAlign: "left",
+		dockInsidePlotArea: true,
+		itemclick: toogleDataSeries
+	},
+    data: [
+        {% for device in object_list.graph_data.results %}
+            {
+                type: "line",
+                showInLegend: true,
+                name: "{% if device.label %}{{ device.label }}{% elif device.location %}{{ device.location }}{% endif %}",
+                markerType: "square",
+                xValueType: "dateTime",
+                xValueFormatString: "DD MMM hh:mm TT",
+                dataPoints: [
+                    {% for data in device.time_reading %}
+                        {   x:{{data.0}}, y:{{ data.1 }}   },
+                    {% endfor %}
+                ]
+            },
+        {% endfor %}
+        {% for device in object_list.restful_graph_data.results %}
+            {
+                type: "line",
+                showInLegend: true,
+                name: "{% if device.label %}{{ device.label }}{% elif device.location %}{{ device.location }}{% endif %}",
+                markerType: "square",
+                xValueType: "dateTime",
+                xValueFormatString: "DD MMM hh:mm TT",
+                dataPoints: [
+                    {% for data in device.time_reading %}
+                        {   x:{{data.0}}, y:{{ data.1 }}   },
+                    {% endfor %}
+                ]
+            },
+        {% endfor %}
+    ]
+});
+chart.render();
+
+function toogleDataSeries(e){
+	if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+		e.dataSeries.visible = false;
+	} else{
+		e.dataSeries.visible = true;
+	}
+	chart.render();
+}
+
+function filter_all(){
+    console.log(tst.toString())
+    delete chart.options.axisX.minimum
+    document.getElementById("filter_val").textContent = "all time"
+    //chart.options.axisX.minimum = tst.getTime()
+    //console.log(chart.axisX.minimum)
+    chart.render()
+}
+
+function filter_by_days_prior(days){
+    tst = new Date()
+    tst.setDate(tst.getDate() - days)
+    console.log(tst.toString())
+    if(days == 1){
+        document.getElementById("filter_val").textContent = "the last 24 hours"
+    }else{
+        document.getElementById("filter_val").textContent = "the last " + days + " days"
+    }
+    chart.options.axisX.minimum = tst.getTime()
+    console.log(chart.axisX.minimum)
+    chart.render()
+}
+document.getElementById("filter1").addEventListener("click", function() {
+    filter_by_days_prior(1)
+}, false);
+
+document.getElementById("filter7").addEventListener("click", function() {
+    filter_by_days_prior(7)
+}, false);
+
+document.getElementById("filter30").addEventListener("click", function() {
+    filter_by_days_prior(30)
+}, false);
+document.getElementById("filterall").addEventListener("click", function() {
+    filter_all()
+}, false);
+}
+</script>
+{% endblock %}
+
+{% block maintitle %}{{ index_title }}{% endblock %}
+
+{% block maincontent %}
+<div class="row">
+    <div class="col-md-12">
+       <section class="panel">
+           <header class="panel-heading">
+                <div class="row">
+                   <div class="col-md-6">
+                        <h2 class="panel-title">Water levels in the The Great River Stour</h2>
+                       <h4 id="filter_val">all time</h4>
+                   </div>
+                   <div class="col-md-6 text-right">
+                       <button id="filter1" type="button" class="btn sm">1 day</button>
+                       <button id="filter7" type="button" class="btn sm">7 days</button>
+                       <button id="filter30" type="button" class="btn sm">30 days</button>
+                       <button id="filterall" type="button" class="btn sm">all time</button>
+                   </div>
+               </div>
+           </header>
+           <div class="panel-body">
+                <div id="chartSensor" style="height: 400px; width: 100%;"></div>
+           </div>
+       </section>
+   </div>
+    <div class="col-md-12">
+        <section class="panel">
+           <header class="panel-heading">
+               <div class="panel-actions">
+                   <a href="#" class="fa fa-caret-down"></a>
+               </div>
+               <h2 class="panel-title">Live Map</h2>
+               <p class="panel-subtitle">Water level data from all over Canterbury. Updates regularly.</p>
+           </header>
+           <div class="panel-body">
+               {% include 'flood_monitoring_system/includes/map_view.html' %}
+           </div>
+       </section>
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <section class="panel">
+           <header class="panel-heading">
+               <div class="panel-actions">
+                   <a href="#" class="fa fa-caret-down"></a>
+               </div>
+               <h2 class="panel-title">Live Data Reliability</h2>
+               <p class="panel-subtitle">See the last time data was retrieved. Thumbs Up = good, Thumbs down = could be better, Warning Sign = bad.</p>
+           </header>
+           <div class="panel-body">
+                <ul id="sub-list">
+                    {% for pin in object_list.map_data.pin_data %}
+                        <li class="list-group-item">
+                            <div class="row">
+                                <div class="col-md-11">
+                                <p><b>{% if pin.label %}{{ pin.label }}{% elif pin.location %}{{ pin.location }}{% endif %}</b> - Last received at: <span class="service-time" style="display:none;">{{ pin.time | date:"m/d/Y H:i" }}</span>{{ pin.time | date:"d/m/Y H:i" }}</p>
+                                </div>
+                                <div class="col-md-1">
+                                    <i class="service-icon"></i>
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                 </ul>
+           </div>
+       </section>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,183 @@
+<html>
+    <head>
+        {% load staticfiles %}
+
+      <!-- Title and Meta -->
+      <title>Flood Monitoring System</title>
+      <link rel="icon" href="{% static 'images/favicon.ico' %}">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+	  <!-- Web Fonts  -->
+      <link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+
+      <!-- Libs -->
+	  <link rel="stylesheet" href="{% static 'lib/bootstrap/css/bootstrap.css' %}" />
+      <link rel="stylesheet" href="{% static 'lib/fontawesome/css/all.min.css' %}" />
+      <script src="{% static 'lib/modernizr/modernizr.js' %}"></script>
+      <script src="{% static 'lib/jquery/jquery.js' %}"></script>
+      <script src="{% static 'lib/bootstrap/js/bootstrap.js' %}"></script>
+      <script src="{% static 'lib/nanoscroller/nanoscroller.js' %}"></script>
+
+	  <!-- Default css and js -->
+        <link href="{% static 'css/main.css' %}" rel="stylesheet">
+        <script src="{% static 'js/main.js'%}"></script>
+
+        <!-- Web Page Unique header content -->
+        {% block header %}
+        {% endblock %}
+    <script>
+        $( document ).ready(function() {
+            let new_alerts_num = $("#alert-list").children().length;
+            let badge = $("#alert-badge");
+            badge.hide()
+            console.log(new_alerts_num);
+            if(new_alerts_num >0){
+                badge.text(new_alerts_num);
+                badge.show()
+            }
+            let span = $("#alert-span");
+            span.text(new_alerts_num);
+        });
+
+    </script>
+    </head>
+    <body>
+        <!--navbar-->
+        <section class="body">
+           <!-- start: header -->
+           <header class="header">
+               <div class="logo-container">
+                   <a href="../" class="logo">
+                       <img src="{% static 'images/logo.png' %}" height="35" alt="JSOFT Admin" />
+                   </a>
+                   <div class="visible-xs toggle-sidebar-left" data-toggle-class="sidebar-left-opened" data-target="html" data-fire-event="sidebar-left-opened">
+                       <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+                   </div>
+               </div>
+               <!-- start: search & user box -->
+               <div class="header-right">
+                   <ul class="notifications">
+                       <li>
+                           <a href="#" class="dropdown-toggle notification-icon" data-toggle="dropdown">
+                           <i class="fa fa-bell"></i>
+                           <span class="badge" id="alert-badge"></span>
+                           </a>
+                           <div class="dropdown-menu notification-menu">
+                               <div class="notification-title">
+                                   <span class="pull-right label label-default" id="alert-span"></span>
+                                   Unread Flood Alerts
+                               </div>
+                               <div class="content">
+                                   <ul id="alert-list">
+                                      {% for a in object_list.flood_alerts.alert_data %}
+                                          {% if a.read == False %}
+                                              <li>
+                                           <a href="#" class="clearfix">
+                                               <div class="image">
+                                                   {% if a.severity_rating == 4 or a.severity_rating == 3 %}
+                                                       <i class="fa fa-thumbs-up bg-success"></i>
+                                                   {% elif a.severity_rating == 2 %}
+                                                       <i class="fa fa-exclamation-triangle bg-warning"></i>
+                                                   {% elif a.severity_rating == 1 %}
+                                                        <i class="fa fa-thumbs-down bg-danger"></i>
+                                                   {% else %}
+                                                        <i class="fa fa-bell bg-danger"></i>
+                                                   {% endif  %}
+                                               </div>
+                                               <span class="title">{{a.severity_message }}</span>
+                                               <span class="message">{{ a.time }}</span>
+                                           </a>
+                                       </li>
+                                          {% endif %}
+                                      {% endfor %}
+                                   </ul>
+                                   <hr />
+                                   <div class="text-right">
+                                       <a href="/alerts/" class="view-more">View All</a>
+                                   </div>
+                               </div>
+                           </div>
+                       </li>
+                   </ul>
+                   <span class="separator"></span>
+               </div>
+               <!-- end: search & user box -->
+           </header>
+           <!-- end: header -->
+           <div class="inner-wrapper">
+           <!-- start: sidebar -->
+           <aside id="sidebar-left" class="sidebar-left">
+               <div class="sidebar-header">
+                   <div class="sidebar-title">
+                       Control Panel
+                   </div>
+                   <div class="sidebar-toggle hidden-xs" data-toggle-class="sidebar-left-collapsed" data-target="html" data-fire-event="sidebar-left-toggle">
+                       <i class="fa fa-bars" aria-label="Toggle sidebar"></i>
+                   </div>
+               </div>
+               <div class="nano">
+                   <div class="nano-content">
+                       <nav id="menu" class="nav-main" role="navigation">
+                           <ul class="nav nav-main">
+                               {% if cookie.id != "" %}
+                                <li>
+                                   <a href="../">
+                                   <i class="fas fa-chart-area" aria-hidden="true"></i>
+                                   <span>Live Stats</span>
+                                   </a>
+                               </li>
+                               <li>
+                                   <a href="/alerts/">
+                                   <i class="fas fa-bell" aria-hidden="true"></i>
+                                   <span>Flood Alerts</span>
+                                   </a>
+                               </li>
+                               <li>
+                                   <a href="/test/">
+                                   <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                                   <span>Test mode</span>
+                                   </a>
+                               </li>
+                               <li>
+                                   <a href="/subscribe/">
+                                   <i class="fas fa-envelope" aria-hidden="true"></i>
+                                   <span>Manage Station Subscriptions</span>
+                                   </a>
+                               </li>
+                                <li>
+                                   <a href="/logout/">
+                                   <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+                                    <span>Logout</span>
+                                   </a>
+                                </li>
+                               {% else %}
+                                   <li>
+                                       <a href="/login/">
+                                       <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+                                        <span>Login</span>
+                                       </a>
+                                    </li>
+                                   <li>
+                                       <a href="/create-account/">
+                                       <i class="fas fa-user" aria-hidden="true"></i>
+                                        <span>Create User</span>
+                                       </a>
+                                    </li>
+                               {% endif %}
+                           </ul>
+                       </nav>
+                   </div>
+               </div>
+           </aside>
+           <!-- end: sidebar -->
+           <section role="main" class="content-body">
+               <header class="page-header">
+                   <h2>{% if cookie.full_name != ""  %}{{ cookie.full_name }} - {% endif %}{% block maintitle %}{% endblock %}</h2>
+               </header>
+               {% block maincontent %}
+               {% endblock %}
+           </section>
+        </section>
+        <!--footer-->
+    </body>
+</html>
